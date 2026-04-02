@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "academic-paper-tracker": {
+      "command": "python3",
+      "args": ["/home/user/Pf/mcp_server.py"],
+      "cwd": "/home/user/Pf"
+    }
+  }
+}
