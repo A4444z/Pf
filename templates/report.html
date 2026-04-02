@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Paper Tracker Report</title>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text: #1a1a2e;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --border: #e5e7eb;
+            --preprint-accent: #059669;
+            --preprint-light: #ecfdf5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .meta { color: var(--muted); font-size: 0.9rem; }
+        .meta span { margin: 0 0.5rem; }
+        .keywords {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        .keyword {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .section { margin-bottom: 2.5rem; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .section-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        .badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge.preprint {
+            background: var(--preprint-accent);
+        }
+        .paper {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s;
+        }
+        .paper:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .paper-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .paper-title a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .paper-title a:hover { text-decoration: underline; }
+        .paper-meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+        .paper-meta .journal {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .paper-authors {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+        .paper-abstract {
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .paper-doi {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+        }
+        .paper-doi a { color: var(--muted); }
+        .empty-msg {
+            text-align: center;
+            color: var(--muted);
+            padding: 2rem;
+            font-style: italic;
+        }
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Academic Paper Tracker Report</h1>
+            <div class="meta">
+                <span>{{ date_range }}</span> &middot;
+                <span>{{ total_count }} papers found</span>
+            </div>
+            <div class="keywords">
+                {% for kw in keywords %}
+                <span class="keyword">{{ kw }}</span>
+                {% endfor %}
+            </div>
+        </header>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>Peer-Reviewed Papers</h2>
+                <span class="badge">{{ peer_reviewed|length }}</span>
+            </div>
+            {% if peer_reviewed %}
+                {% for paper in peer_reviewed %}
+                <div class="paper">
+                    <div class="paper-title">
+                        <a href="{{ paper.url }}" target="_blank" rel="noopener">{{ paper.title }}</a>
+                    </div>
+                    <div class="paper-meta">
+                        <span class="journal">{{ paper.journal }}</span> &middot; {{ paper.date }}
+                    </div>
+                    {% if paper.authors %}
+                    <div class="paper-authors">{{ paper.authors | join(", ") }}</div>
+                    {% endif %}
+                    {% if paper.abstract %}
+                    <div class="paper-abstract">{{ paper.abstract[:500] }}{% if paper.abstract|length > 500 %}...{% endif %}</div>
+                    {% endif %}
+                    {% if paper.doi %}
+                    <div class="paper-doi">DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a></div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-msg">No peer-reviewed papers from high-impact journals found for these keywords in the past 30 days.</div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>Preprints</h2>
+                <span class="badge preprint">{{ preprints|length }}</span>
+            </div>
+            {% if preprints %}
+                {% for paper in preprints %}
+                <div class="paper">
+                    <div class="paper-title">
+                        <a href="{{ paper.url }}" target="_blank" rel="noopener">{{ paper.title }}</a>
+                    </div>
+                    <div class="paper-meta">
+                        <span class="journal">{{ paper.journal }}</span> &middot; {{ paper.date }}
+                    </div>
+                    {% if paper.authors %}
+                    <div class="paper-authors">{{ paper.authors | join(", ") }}</div>
+                    {% endif %}
+                    {% if paper.abstract %}
+                    <div class="paper-abstract">{{ paper.abstract[:500] }}{% if paper.abstract|length > 500 %}...{% endif %}</div>
+                    {% endif %}
+                    {% if paper.doi %}
+                    <div class="paper-doi">DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a></div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-msg">No preprints found for these keywords in the past 30 days.</div>
+            {% endif %}
+        </div>
+
+        <footer>
+            Generated by Academic Paper Tracker &middot; {{ generated_at }}
+            <br>Sources: PubMed, arXiv, Crossref
+        </footer>
+    </div>
+</body>
+</html>
